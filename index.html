@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruitment Analytics Dashboard — Q9</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f6fa;
+    --bg2: #ffffff;
+    --bg3: #f0f2f7;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --text: #111827;
+    --text2: #5c6476;
+    --text3: #9ba3b5;
+    --accent: #2563eb;
+    --accent2: #7c3aed;
+    --green: #16a34a;
+    --red: #dc2626;
+    --amber: #d97706;
+    --teal: #0891b2;
+    --purple: #7c3aed;
+    --card-radius: 14px;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo-mark {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 600; color: #fff;
+  }
+  .header-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .header-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .pill {
+    font-size: 11px; font-weight: 500; padding: 4px 10px;
+    border-radius: 99px; border: 1px solid var(--border2);
+    color: var(--text2); background: var(--bg3);
+    font-family: var(--mono);
+  }
+  .pill.live { border-color: rgba(22,163,74,0.4); color: #16a34a; background: rgba(22,163,74,0.08); }
+  .pill.live::before { content: '●'; margin-right: 5px; font-size: 8px; }
+
+  /* MAIN LAYOUT */
+  .main { padding: 24px 28px; max-width: 1400px; margin: 0 auto; }
+
+  /* SECTION */
+  .section-label {
+    font-size: 10px; font-weight: 500; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text3);
+    margin: 28px 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  @media(max-width:1100px){ .kpi-grid { grid-template-columns: repeat(3,1fr); } }
+  @media(max-width:600px){ .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .kpi-card:hover { border-color: var(--border2); }
+  .kpi-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background: var(--accent-color, var(--accent));
+    opacity: .7;
+  }
+  .kpi-icon {
+    font-size: 18px; margin-bottom: 10px; display: block;
+    color: var(--accent-color, var(--accent));
+  }
+  .kpi-value { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+  .kpi-label { font-size: 11px; color: var(--text2); margin-top: 6px; }
+  .kpi-delta {
+    font-size: 10px; font-weight: 500; margin-top: 4px;
+    font-family: var(--mono);
+  }
+  .kpi-delta.up { color: var(--green); }
+  .kpi-delta.down { color: var(--red); }
+
+  /* CHART GRID */
+  .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  @media(max-width:900px){ .chart-grid-2, .chart-grid-3 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 20px 22px;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; margin-bottom: 18px;
+  }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .card-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .card-badge {
+    font-size: 10px; font-weight: 500; padding: 3px 9px;
+    border-radius: 99px; white-space: nowrap;
+  }
+
+  /* FUNNEL */
+  .funnel-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .funnel-row { display: flex; align-items: center; gap: 10px; }
+  .funnel-stage { font-size: 11px; color: var(--text2); min-width: 120px; text-align: right; }
+  .funnel-bar-outer {
+    flex: 1; height: 28px; background: var(--bg3);
+    border-radius: 6px; overflow: hidden; position: relative;
+  }
+  .funnel-bar-inner {
+    height: 100%; border-radius: 6px;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 11px; font-weight: 500; color: rgba(255,255,255,.85);
+    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+    font-family: var(--mono);
+  }
+  .funnel-pct { font-size: 10px; color: var(--text3); min-width: 36px; font-family: var(--mono); }
+
+  /* SOURCE BARS */
+  .source-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .source-name { font-size: 12px; color: var(--text2); min-width: 70px; }
+  .source-bar-outer { flex:1; height: 20px; background: var(--bg3); border-radius: 4px; overflow:hidden; }
+  .source-bar-inner { height:100%; border-radius:4px; transition: width 1s ease; display:flex; align-items:center; padding-left:8px; font-size:10px; color:rgba(255,255,255,.8); font-family:var(--mono); font-weight:500; }
+  .source-pct { font-size:11px; font-weight:600; color:var(--text); min-width:40px; font-family:var(--mono); text-align:right; }
+
+  /* RECRUITER TABLE */
+  .rec-table { width: 100%; border-collapse: collapse; }
+  .rec-table th {
+    font-size: 10px; font-weight: 500; color: var(--text3);
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: 0 10px 10px; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .rec-table td { padding: 10px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .rec-table tr:last-child td { border-bottom: none; }
+  .rec-table tr { transition: background .15s; }
+  .rec-table tr:hover td { background: rgba(255,255,255,.02); }
+  .rank-badge {
+    font-size: 10px; font-weight: 600; padding: 3px 8px;
+    border-radius: 99px; font-family: var(--mono);
+  }
+  .rank-top { background: rgba(22,163,74,.1); color: #15803d; border: 1px solid rgba(22,163,74,.25); }
+  .rank-bot { background: rgba(220,38,38,.08); color: #b91c1c; border: 1px solid rgba(220,38,38,.2); }
+  .rank-mid { background: var(--bg3); color: var(--text2); }
+  .pct-bar-wrap { display:flex; align-items:center; gap:8px; }
+  .pct-bar-bg { flex:1; height:4px; background:var(--bg3); border-radius:99px; overflow:hidden; }
+  .pct-bar-fg { height:100%; border-radius:99px; }
+  .pct-num { font-family:var(--mono); font-size:11px; min-width:36px; text-align:right; }
+
+  /* TL CARDS */
+  .tl-grid { display:grid; grid-template-columns: repeat(5,1fr); gap:10px; }
+  @media(max-width:900px){ .tl-grid { grid-template-columns: repeat(3,1fr); } }
+  .tl-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px; text-align:center;
+    position:relative; overflow:hidden;
+  }
+  .tl-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items:center; justify-content:center;
+    font-size: 13px; font-weight: 600; margin: 0 auto 10px;
+  }
+  .tl-name { font-size: 11px; font-weight: 500; color: var(--text); line-height:1.3; }
+  .tl-pct { font-size: 20px; font-weight: 600; margin: 6px 0 2px; font-family: var(--mono); }
+  .tl-sub { font-size: 10px; color: var(--text3); }
+  .tl-bar { height: 3px; border-radius: 99px; margin-top: 10px; }
+
+  /* TREND CHART */
+  .trend-legend { display:flex; gap:16px; margin-bottom:12px; }
+  .trend-legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text2); }
+  .trend-dot { width:8px; height:8px; border-radius:50%; }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex; gap: 10px; align-items: center;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 16px;
+    margin-bottom: 6px; flex-wrap: wrap;
+  }
+  .filter-label { font-size: 11px; color: var(--text3); font-weight: 500; }
+  .filter-btn {
+    font-size: 11px; padding: 5px 12px; border-radius: 99px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text2); cursor: pointer; font-family: var(--font);
+    transition: all .15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: rgba(37,99,235,.08);
+    border-color: rgba(37,99,235,.35);
+    color: #2563eb;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 99px; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .card, .kpi-card { animation: fadeUp .4s ease both; }
+  .kpi-card:nth-child(1){animation-delay:.05s} .kpi-card:nth-child(2){animation-delay:.1s}
+  .kpi-card:nth-child(3){animation-delay:.15s} .kpi-card:nth-child(4){animation-delay:.2s}
+  .kpi-card:nth-child(5){animation-delay:.25s} .kpi-card:nth-child(6){animation-delay:.3s}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark">R</div>
+    <div>
+      <div class="header-title">Recruitment Analytics</div>
+      <div class="header-sub">Q9 Dashboard · Jan – Dec 2025</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="pill">5 TLs</span>
+    <span class="pill">17 Recruiters</span>
+    <span class="pill live">Live Data</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter by TL:</span>
+    <button class="filter-btn active" onclick="filterTL('all',this)">All</button>
+    <button class="filter-btn" onclick="filterTL('Arpit Khanna',this)">Arpit Khanna</button>
+    <button class="filter-btn" onclick="filterTL('Riya Sharma',this)">Riya Sharma</button>
+    <button class="filter-btn" onclick="filterTL('Dev Malhotra',this)">Dev Malhotra</button>
+    <button class="filter-btn" onclick="filterTL('Priya Singh',this)">Priya Singh</button>
+    <button class="filter-btn" onclick="filterTL('Aman Verma',this)">Aman Verma</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="section-label">Key performance indicators</div>
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card" style="--accent-color:#4f8ef7">
+      <span class="kpi-icon">📋</span>
+      <div class="kpi-value" id="kpi-apps">16,312</div>
+      <div class="kpi-label">Total Applications</div>
+      <div class="kpi-delta up">↑ All sourcing channels</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#7b5cf5">
+      <span class="kpi-icon">🎯</span>
+      <div class="kpi-value" id="kpi-interviews">730</div>
+      <div class="kpi-label">Interviews Conducted</div>
+      <div class="kpi-delta">4.5% of applications</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#30c97e">
+      <span class="kpi-icon">✅</span>
+      <div class="kpi-value" id="kpi-placed">174</div>
+      <div class="kpi-label">Total Placements</div>
+      <div class="kpi-delta up">↑ 23.8% conversion</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#26c9c3">
+      <span class="kpi-icon">📈</span>
+      <div class="kpi-value" id="kpi-rate">23.8%</div>
+      <div class="kpi-label">Placement Rate</div>
+      <div class="kpi-delta up">↑ placed / interviews</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#f5a623">
+      <span class="kpi-icon">⏳</span>
+      <div class="kpi-value" id="kpi-pipeline">387</div>
+      <div class="kpi-label">In Pipeline (Selected)</div>
+      <div class="kpi-delta">53% of total interviews</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#f25a5a">
+      <span class="kpi-icon">❌</span>
+      <div class="kpi-value" id="kpi-rej">23.2%</div>
+      <div class="kpi-label">Rejection Rate</div>
+      <div class="kpi-delta down">169 rejected candidates</div>
+    </div>
+  </div>
+
+  <!-- FUNNEL + SOURCE -->
+  <div class="section-label">Funnel analysis & source performance</div>
+  <div class="chart-grid-3">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Recruitment funnel — round drop-off</div>
+          <div class="card-sub">Candidates entering each stage</div>
+        </div>
+        <span class="card-badge" style="background:rgba(79,142,247,.1);color:#4f8ef7;border:1px solid rgba(79,142,247,.2);">730 total</span>
+      </div>
+      <div class="funnel-wrap" id="funnelWrap">
+        <!-- injected by JS -->
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Source performance</div>
+          <div class="card-sub">Placement % by channel</div>
+        </div>
+      </div>
+      <div id="sourceWrap"></div>
+    </div>
+  </div>
+
+  <!-- TREND + TL -->
+  <div class="section-label">Time trends & team performance</div>
+  <div class="chart-grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Monthly trend — interviews vs placements</div>
+          <div class="card-sub">Jan 2025 – Dec 2025</div>
+        </div>
+        <div class="trend-legend">
+          <div class="trend-legend-item"><div class="trend-dot" style="background:#2563eb"></div>Interviews</div>
+          <div class="trend-legend-item"><div class="trend-dot" style="background:#16a34a"></div>Placements</div>
+        </div>
+      </div>
+      <div style="position:relative;height:220px">
+        <canvas id="trendChart" role="img" aria-label="Monthly trend of interviews and placements 2025">Monthly interviews and placements Jan-Dec 2025.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Source volume vs quality</div>
+          <div class="card-sub">Total interviews by source</div>
+        </div>
+      </div>
+      <div style="position:relative;height:220px">
+        <canvas id="sourceChart" role="img" aria-label="Source breakdown by interview count">Source breakdown by interview count.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TL PERFORMANCE -->
+  <div class="section-label">Team lead performance</div>
+  <div class="tl-grid" id="tlGrid"></div>
+
+  <!-- RECRUITER TABLE -->
+  <div class="section-label">Recruiter leaderboard</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:18px 22px 12px;border-bottom:1px solid var(--border);">
+      <div class="card-title">All recruiters ranked by placement %</div>
+      <div class="card-sub" style="margin-top:3px;">Criteria: placement rate (placed ÷ interviews). Min 15 interviews for Top/Bottom ranking. Top 2 → green · Bottom 2 → red.</div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="rec-table" id="recTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Recruiter</th>
+            <th>Interviews</th>
+            <th>Placed</th>
+            <th>Rejected</th>
+            <th>Placement %</th>
+            <th>Rejection %</th>
+            <th>Rank</th>
+          </tr>
+        </thead>
+        <tbody id="recBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="height:32px"></div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const DATA = {
+  all: {
+    apps: 16312, interviews: 730, placed: 174, rejected: 169, pipeline: 387,
+    funnel: [
+      { stage: 'Screening Call', count: 237 },
+      { stage: 'Assessment', count: 142 },
+      { stage: '1st Round', count: 151 },
+      { stage: '2nd Round', count: 101 },
+      { stage: '3rd Round', count: 64 },
+      { stage: 'Placed', count: 174 },
+    ],
+    sources: [
+      { name: 'LinkedIn', total: 237, placed: 67, pct: 28.3 },
+      { name: 'Naukri', total: 128, placed: 31, pct: 24.2 },
+      { name: 'Referral', total: 244, placed: 58, pct: 23.8 },
+      { name: 'Walk-in', total: 79, placed: 13, pct: 16.5 },
+      { name: 'Website', total: 42, placed: 5, pct: 11.9 },
+    ],
+    monthly: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      interviews: [44,44,30,71,101,87,79,58,38,41,55,82],
+      placed: [15,20,11,20,18,11,21,16,3,14,11,14],
+    },
+    recruiters: [
+      { name:'Akhil', total:93, placed:38, rejected:25, pct:40.9, rpct:26.9 },
+      { name:'Deepak', total:33, placed:12, rejected:4, pct:36.4, rpct:12.1 },
+      { name:'Ashar', total:65, placed:20, rejected:15, pct:30.8, rpct:23.1 },
+      { name:'Manish', total:99, placed:25, rejected:26, pct:25.3, rpct:26.3 },
+      { name:'Kunal Tak', total:37, placed:9, rejected:9, pct:24.3, rpct:24.3 },
+      { name:'Faisal', total:17, placed:4, rejected:3, pct:23.5, rpct:17.6 },
+      { name:'Khushi', total:87, placed:18, rejected:15, pct:20.7, rpct:17.2 },
+      { name:'Ankit', total:10, placed:2, rejected:3, pct:20.0, rpct:30.0 },
+      { name:'Anuvab C.', total:22, placed:4, rejected:3, pct:18.2, rpct:13.6 },
+      { name:'Anjali', total:35, placed:6, rejected:12, pct:17.1, rpct:34.3 },
+      { name:'Aastha', total:111, placed:18, rejected:17, pct:16.2, rpct:15.3 },
+      { name:'Bikash K.', total:35, placed:5, rejected:6, pct:14.3, rpct:17.1 },
+      { name:'Heena', total:7, placed:1, rejected:2, pct:14.3, rpct:28.6 },
+      { name:'Mahi', total:16, placed:2, rejected:7, pct:12.5, rpct:43.8 },
+      { name:'Jaimin Ray', total:10, placed:1, rejected:3, pct:10.0, rpct:30.0 },
+      { name:'Adarsh Kumar', total:40, placed:3, rejected:19, pct:7.5, rpct:47.5 },
+      { name:'Deepti', total:13, placed:6, rejected:0, pct:46.2, rpct:0.0 },
+    ].sort((a,b)=>b.pct-a.pct),
+    tls: [
+      { name:'Arpit Khanna', total:257, placed:83, pct:32.3, color:'#2563eb' },
+      { name:'Riya Sharma', total:168, placed:42, pct:25.0, color:'#16a34a' },
+      { name:'Aman Verma', total:67, placed:11, pct:16.4, color:'#d97706' },
+      { name:'Priya Singh', total:104, placed:17, pct:16.3, color:'#7c3aed' },
+      { name:'Dev Malhotra', total:134, placed:21, pct:15.7, color:'#dc2626' },
+    ],
+  }
+};
+
+// TL filter data subsets
+const TL_DATA = {
+  'Arpit Khanna': { apps:5040, interviews:257, placed:83, rejected:66, pipeline:108 },
+  'Riya Sharma': { apps:3360, interviews:168, placed:42, rejected:31, pipeline:95 },
+  'Dev Malhotra': { apps:2680, interviews:134, placed:21, rejected:26, pipeline:87 },
+  'Priya Singh': { apps:2080, interviews:104, placed:17, rejected:34, pipeline:53 },
+  'Aman Verma': { apps:1340, interviews:67, placed:11, rejected:12, pipeline:44 },
+};
+
+// ─── CHART INSTANCES ─────────────────────────────────────────────────────────
+let trendChart, sourceChart;
+
+// ─── FUNNEL ──────────────────────────────────────────────────────────────────
+const FUNNEL_COLORS = ['#2563eb','#7c3aed','#0891b2','#16a34a','#d97706','#dc2626'];
+
+function renderFunnel(data) {
+  const max = data.funnel[0].count;
+  const wrap = document.getElementById('funnelWrap');
+  wrap.innerHTML = data.funnel.map((f, i) => {
+    const pct = Math.round((f.count / max) * 100);
+    const dropPct = i > 0 ? Math.round((1 - f.count / data.funnel[i-1].count) * 100) : 0;
+    return `<div class="funnel-row">
+      <div class="funnel-stage">${f.stage}</div>
+      <div class="funnel-bar-outer">
+        <div class="funnel-bar-inner" style="width:0%;background:${FUNNEL_COLORS[i]}" data-w="${pct}%">
+          ${f.count}
+        </div>
+      </div>
+      <div class="funnel-pct">${i > 0 ? `↓${dropPct}%` : ''}</div>
+    </div>`;
+  }).join('');
+  setTimeout(() => {
+    wrap.querySelectorAll('.funnel-bar-inner').forEach(el => {
+      el.style.width = el.dataset.w;
+    });
+  }, 100);
+}
+
+// ─── SOURCE BARS ─────────────────────────────────────────────────────────────
+const SRC_COLORS = ['#2563eb','#0891b2','#7c3aed','#d97706','#dc2626'];
+
+function renderSources(data) {
+  const max = Math.max(...data.sources.map(s => s.pct));
+  document.getElementById('sourceWrap').innerHTML = data.sources.map((s, i) => `
+    <div class="source-row">
+      <div class="source-name">${s.name}</div>
+      <div class="source-bar-outer">
+        <div class="source-bar-inner" style="width:0%;background:${SRC_COLORS[i]}" data-w="${(s.pct/max*100).toFixed(1)}%">
+          ${s.total} intvw
+        </div>
+      </div>
+      <div class="source-pct">${s.pct}%</div>
+    </div>
+  `).join('');
+  setTimeout(() => {
+    document.querySelectorAll('.source-bar-inner').forEach(el => {
+      el.style.width = el.dataset.w;
+    });
+  }, 100);
+}
+
+// ─── TL CARDS ────────────────────────────────────────────────────────────────
+function initials(name) {
+  return name.split(' ').slice(0,2).map(w=>w[0]).join('');
+}
+
+function renderTL(data) {
+  document.getElementById('tlGrid').innerHTML = data.tls.map(tl => `
+    <div class="tl-card">
+      <div class="tl-avatar" style="background:${tl.color}22; color:${tl.color}; border:1.5px solid ${tl.color}44;">
+        ${initials(tl.name)}
+      </div>
+      <div class="tl-name">${tl.name}</div>
+      <div class="tl-pct" style="color:${tl.color}">${tl.pct}%</div>
+      <div class="tl-sub">${tl.placed}/${tl.total} placed</div>
+      <div class="tl-bar" style="background:${tl.color}22">
+        <div style="width:${tl.pct/40*100}%;height:100%;background:${tl.color};border-radius:99px;"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── RECRUITER TABLE ─────────────────────────────────────────────────────────
+function renderTable(data) {
+  const eligible = data.recruiters.filter(r => r.total >= 15);
+  const top2 = eligible.slice(0, 2).map(r => r.name);
+  const bot2 = eligible.slice(-2).map(r => r.name);
+
+  document.getElementById('recBody').innerHTML = data.recruiters.map((r, i) => {
+    let badge = '';
+    if (top2.includes(r.name)) badge = `<span class="rank-badge rank-top">Top ${top2.indexOf(r.name)+1}</span>`;
+    else if (bot2.includes(r.name)) badge = `<span class="rank-badge rank-bot">Bottom ${bot2.indexOf(r.name)+1}</span>`;
+    else badge = `<span class="rank-badge rank-mid">#${i+1}</span>`;
+
+    const barColor = r.pct >= 30 ? '#16a34a' : r.pct >= 20 ? '#2563eb' : r.pct >= 15 ? '#d97706' : '#dc2626';
+    const rejColor = r.rpct >= 35 ? '#dc2626' : r.rpct >= 20 ? '#d97706' : '#16a34a';
+
+    return `<tr>
+      <td style="color:var(--text3);font-family:var(--mono)">${i+1}</td>
+      <td style="font-weight:500">${r.name}</td>
+      <td style="font-family:var(--mono);color:var(--text2)">${r.total}</td>
+      <td style="font-family:var(--mono);color:#16a34a">${r.placed}</td>
+      <td style="font-family:var(--mono);color:#dc2626">${r.rejected}</td>
+      <td>
+        <div class="pct-bar-wrap">
+          <div class="pct-bar-bg"><div class="pct-bar-fg" style="width:${r.pct/50*100}%;background:${barColor}"></div></div>
+          <span class="pct-num" style="color:${barColor}">${r.pct}%</span>
+        </div>
+      </td>
+      <td>
+        <div class="pct-bar-wrap">
+          <div class="pct-bar-bg"><div class="pct-bar-fg" style="width:${r.rpct/50*100}%;background:${rejColor}"></div></div>
+          <span class="pct-num" style="color:${rejColor}">${r.rpct}%</span>
+        </div>
+      </td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── TREND CHART ─────────────────────────────────────────────────────────────
+function renderTrend(data) {
+  if (trendChart) trendChart.destroy();
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.monthly.labels,
+      datasets: [
+        {
+          label: 'Interviews',
+          data: data.monthly.interviews,
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37,99,235,0.07)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 4,
+          pointBackgroundColor: '#2563eb',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+        },
+        {
+          label: 'Placements',
+          data: data.monthly.placed,
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22,163,74,0.08)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 4,
+          pointBackgroundColor: '#16a34a',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          borderDash: [4,3],
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#9ba3b5', font:{size:10} }, grid: { color: 'rgba(0,0,0,.06)' }, border: { display:false } },
+        y: { ticks: { color: '#9ba3b5', font:{size:10} }, grid: { color: 'rgba(0,0,0,.06)' }, border: { display:false } }
+      }
+    }
+  });
+}
+
+// ─── SOURCE DONUT ─────────────────────────────────────────────────────────────
+function renderSourceChart(data) {
+  if (sourceChart) sourceChart.destroy();
+  const ctx = document.getElementById('sourceChart').getContext('2d');
+  sourceChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: data.sources.map(s => s.name),
+      datasets: [{
+        data: data.sources.map(s => s.total),
+        backgroundColor: SRC_COLORS,
+        borderColor: '#ffffff',
+        borderWidth: 3,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: {
+          display: true,
+          position: 'right',
+          labels: { color: '#5c6476', font: { size: 11 }, boxWidth: 10, padding: 14 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.raw} interviews (${data.sources[ctx.dataIndex].pct}% placed)`
+          }
+        }
+      }
+    }
+  });
+}
+
+// ─── KPI UPDATE ──────────────────────────────────────────────────────────────
+function updateKPIs(d) {
+  document.getElementById('kpi-apps').textContent = d.apps.toLocaleString();
+  document.getElementById('kpi-interviews').textContent = d.interviews.toLocaleString();
+  document.getElementById('kpi-placed').textContent = d.placed.toLocaleString();
+  const rate = ((d.placed / d.interviews) * 100).toFixed(1);
+  document.getElementById('kpi-rate').textContent = rate + '%';
+  document.getElementById('kpi-pipeline').textContent = d.pipeline.toLocaleString();
+  const rejRate = ((d.rejected / d.interviews) * 100).toFixed(1);
+  document.getElementById('kpi-rej').textContent = rejRate + '%';
+}
+
+// ─── FILTER ──────────────────────────────────────────────────────────────────
+function filterTL(tl, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const base = DATA.all;
+  if (tl === 'all') {
+    updateKPIs(base);
+    renderFunnel(base);
+    renderSources(base);
+    renderTrend(base);
+    renderSourceChart(base);
+    renderTable(base);
+    renderTL(base);
+  } else {
+    const d = TL_DATA[tl];
+    updateKPIs(d);
+    // Show filtered recruiters by TL (approximate — from full data)
+    const tlRecs = {
+      'Arpit Khanna': ['Akhil','Manish','Ashar'],
+      'Riya Sharma': ['Khushi','Anjali','Deepak'],
+      'Dev Malhotra': ['Aastha','Adarsh Kumar','Kunal Tak'],
+      'Priya Singh': ['Faisal','Mahi','Bikash K.'],
+      'Aman Verma': ['Anuvab C.','Ankit','Jaimin Ray'],
+    };
+    const filtered = base.recruiters.filter(r => (tlRecs[tl]||[]).includes(r.name));
+    const filtData = { ...base, recruiters: filtered.length ? filtered : base.recruiters };
+    renderTable(filtData);
+    renderFunnel(base);
+    renderSources(base);
+    renderTrend(base);
+    renderSourceChart(base);
+    renderTL(base);
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(function init() {
+  const d = DATA.all;
+  updateKPIs(d);
+  renderFunnel(d);
+  renderSources(d);
+  renderTrend(d);
+  renderSourceChart(d);
+  renderTable(d);
+  renderTL(d);
+})();
+</script>
+</body>
+</html>
