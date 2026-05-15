@@ -4,258 +4,375 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Recruitment Analytics Dashboard — Q9</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f4f6fa;
-    --bg2: #ffffff;
-    --bg3: #f0f2f7;
-    --border: rgba(0,0,0,0.08);
-    --border2: rgba(0,0,0,0.14);
-    --text: #111827;
-    --text2: #5c6476;
-    --text3: #9ba3b5;
-    --accent: #2563eb;
-    --accent2: #7c3aed;
-    --green: #16a34a;
-    --red: #dc2626;
-    --amber: #d97706;
-    --teal: #0891b2;
-    --purple: #7c3aed;
-    --card-radius: 14px;
-    --font: 'DM Sans', sans-serif;
-    --mono: 'DM Mono', monospace;
+    --bg-primary: #fdf6ee;
+    --bg-secondary: #fef0e0;
+    --bg-tertiary: #fce8d0;
+    --bg-card: #ffffff;
+    --bg-hover: #fff5ec;
+
+    --border: rgba(180, 83, 9, 0.1);
+    --border-light: rgba(180, 83, 9, 0.14);
+    --border-strong: rgba(180, 83, 9, 0.28);
+
+    --text-primary: #431407;
+    --text-secondary: #7c2d12;
+    --text-tertiary: #9a3412;
+    --text-muted: #c2410c;
+
+    --accent-orange: #ea580c;
+    --accent-orange-light: #f97316;
+    --accent-orange-dark: #c2410c;
+
+    --accent-red: #b91c1c;
+    --accent-red-light: #dc2626;
+
+    --accent-amber: #b45309;
+    --accent-amber-light: #d97706;
+
+    --accent-gold: #a16207;
+    --accent-gold-light: #ca8a04;
+
+    --accent-rust: #92400e;
+    --accent-rust-light: #b45309;
+
+    --accent-crimson: #9f1239;
+    --accent-crimson-light: #be123c;
+
+    --shadow-sm: 0 1px 3px rgba(180,83,9,0.08), 0 1px 2px rgba(180,83,9,0.05);
+    --shadow-md: 0 4px 6px rgba(180,83,9,0.08), 0 2px 4px rgba(180,83,9,0.05);
+    --shadow-lg: 0 10px 20px rgba(180,83,9,0.1), 0 4px 8px rgba(180,83,9,0.06);
+    --shadow-xl: 0 20px 30px rgba(180,83,9,0.12), 0 8px 12px rgba(180,83,9,0.07);
+
+    --card-radius: 16px;
+    --font: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', 'Consolas', monospace;
   }
 
   body {
     font-family: var(--font);
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg-primary);
+    background-image:
+      radial-gradient(ellipse 70% 40% at 10% 0%, rgba(249,115,22,0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 30% at 90% 100%, rgba(220,38,38,0.07) 0%, transparent 60%);
+    color: var(--text-primary);
     min-height: 100vh;
-    padding: 0;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* HEADER */
   .header {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 28px;
+    background: linear-gradient(180deg, #fff5ec 0%, #fef0e0 100%);
+    border-bottom: 1px solid var(--border-light);
+    padding: 20px 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 100;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 16px rgba(180,83,9,0.08), 0 1px 0 rgba(234,88,12,0.12);
   }
-  .header-left { display: flex; align-items: center; gap: 12px; }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
   .logo-mark {
-    width: 34px; height: 34px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 9px;
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+    border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 15px; font-weight: 600; color: #fff;
+    font-size: 20px; font-weight: 700; color: #fff;
+    box-shadow: 0 4px 16px rgba(249,115,22,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    position: relative; overflow: hidden;
   }
-  .header-title { font-size: 15px; font-weight: 600; color: var(--text); }
-  .header-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
-  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  .logo-mark::before {
+    content: '';
+    position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  }
+
+  .header-title { font-size: 18px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+  .header-sub { font-size: 13px; color: var(--text-tertiary); margin-top: 2px; font-weight: 500; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
   .pill {
-    font-size: 11px; font-weight: 500; padding: 4px 10px;
-    border-radius: 99px; border: 1px solid var(--border2);
-    color: var(--text2); background: var(--bg3);
-    font-family: var(--mono);
+    font-size: 12px; font-weight: 600; padding: 6px 14px;
+    border-radius: 8px; border: 1px solid var(--border-strong);
+    color: var(--text-secondary); background: var(--bg-tertiary);
+    font-family: var(--mono); transition: all 0.2s;
   }
-  .pill.live { border-color: rgba(22,163,74,0.4); color: #16a34a; background: rgba(22,163,74,0.08); }
-  .pill.live::before { content: '●'; margin-right: 5px; font-size: 8px; }
 
-  /* MAIN LAYOUT */
-  .main { padding: 24px 28px; max-width: 1400px; margin: 0 auto; }
+  .pill:hover { border-color: var(--accent-orange); background: rgba(249,115,22,0.08); }
 
-  /* SECTION */
+  .pill.live {
+    border-color: rgba(234,88,12,0.4); color: var(--accent-orange-dark);
+    background: rgba(249,115,22,0.1); box-shadow: 0 0 12px rgba(249,115,22,0.2);
+  }
+
+  .pill.live::before { content: '●'; margin-right: 6px; font-size: 10px; animation: pulse 2s infinite; }
+
+  @keyframes pulse { 0%, 100% { opacity:1; } 50% { opacity:0.4; } }
+
+  /* MAIN */
+  .main { padding: 32px; max-width: 1600px; margin: 0 auto; }
+
   .section-label {
-    font-size: 10px; font-weight: 500; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--text3);
-    margin: 28px 0 12px;
-    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin: 40px 0 16px; display: flex; align-items: center; gap: 12px;
   }
-  .section-label::after { content:''; flex:1; height:1px; background: var(--border); }
 
-  /* KPI GRID */
-  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-  @media(max-width:1100px){ .kpi-grid { grid-template-columns: repeat(3,1fr); } }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(to right, var(--border-light), transparent);
+  }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 16px; }
+  @media(max-width:1200px){ .kpi-grid { grid-template-columns: repeat(3,1fr); } }
   @media(max-width:600px){ .kpi-grid { grid-template-columns: repeat(2,1fr); } }
 
   .kpi-card {
-    background: var(--bg2);
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--card-radius);
-    padding: 18px 20px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color .2s;
+    padding: 24px; position: relative; overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: var(--shadow-sm);
   }
-  .kpi-card:hover { border-color: var(--border2); }
+
+  .kpi-card:hover {
+    border-color: var(--accent-color, var(--accent-orange));
+    transform: translateY(-2px); box-shadow: var(--shadow-lg);
+  }
+
   .kpi-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:2px;
-    background: var(--accent-color, var(--accent));
-    opacity: .7;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent-color, var(--accent-orange)), var(--accent-light, var(--accent-orange-light)));
   }
-  .kpi-icon {
-    font-size: 18px; margin-bottom: 10px; display: block;
-    color: var(--accent-color, var(--accent));
+
+  .kpi-card::after {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, var(--accent-color, var(--accent-orange)) 0%, transparent 70%);
+    opacity: 0.06; pointer-events: none;
   }
-  .kpi-value { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
-  .kpi-label { font-size: 11px; color: var(--text2); margin-top: 6px; }
-  .kpi-delta {
-    font-size: 10px; font-weight: 500; margin-top: 4px;
-    font-family: var(--mono);
-  }
-  .kpi-delta.up { color: var(--green); }
-  .kpi-delta.down { color: var(--red); }
+
+  .kpi-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+  .kpi-value { font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1; font-family: var(--mono); letter-spacing: -0.02em; }
+  .kpi-label { font-size: 12px; color: var(--text-tertiary); margin-top: 8px; font-weight: 500; }
+  .kpi-delta { font-size: 11px; font-weight: 600; margin-top: 6px; font-family: var(--mono); padding: 4px 8px; border-radius: 6px; display: inline-block; }
+  .kpi-delta.up { color: #c2410c; background: rgba(249,115,22,0.12); }
+  .kpi-delta.down { color: #b91c1c; background: rgba(220,38,38,0.1); }
 
   /* CHART GRID */
-  .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .chart-grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
-  @media(max-width:900px){ .chart-grid-2, .chart-grid-3 { grid-template-columns: 1fr; } }
+  .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .chart-grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  @media(max-width:1000px){ .chart-grid-2, .chart-grid-3 { grid-template-columns: 1fr; } }
 
   .card {
-    background: var(--bg2);
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--card-radius);
-    padding: 20px 22px;
-    transition: border-color .2s;
+    padding: 24px; transition: all 0.3s;
+    box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
   }
-  .card:hover { border-color: var(--border2); }
-  .card-header {
-    display: flex; align-items: flex-start;
-    justify-content: space-between; margin-bottom: 18px;
+
+  .card::before {
+    content: ''; position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(249,115,22,0.025) 0%, transparent 70%);
+    pointer-events: none;
   }
-  .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
-  .card-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
-  .card-badge {
-    font-size: 10px; font-weight: 500; padding: 3px 9px;
-    border-radius: 99px; white-space: nowrap;
-  }
+
+  .card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .card-title { font-size: 16px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
+  .card-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; font-weight: 500; }
+  .card-badge { font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 8px; white-space: nowrap; font-family: var(--mono); }
 
   /* FUNNEL */
-  .funnel-wrap { display: flex; flex-direction: column; gap: 8px; }
-  .funnel-row { display: flex; align-items: center; gap: 10px; }
-  .funnel-stage { font-size: 11px; color: var(--text2); min-width: 120px; text-align: right; }
+  .funnel-wrap { display: flex; flex-direction: column; gap: 12px; }
+  .funnel-row { display: flex; align-items: center; gap: 12px; }
+  .funnel-stage { font-size: 12px; color: var(--text-secondary); min-width: 130px; text-align: right; font-weight: 600; }
+
   .funnel-bar-outer {
-    flex: 1; height: 28px; background: var(--bg3);
-    border-radius: 6px; overflow: hidden; position: relative;
+    flex: 1; height: 36px;
+    background: #fef3e8;
+    border-radius: 8px; overflow: hidden; position: relative;
+    box-shadow: inset 0 2px 4px rgba(180,83,9,0.08), inset 0 0 0 1px rgba(234,88,12,0.08);
   }
+
   .funnel-bar-inner {
-    height: 100%; border-radius: 6px;
+    height: 100%; border-radius: 8px;
     display: flex; align-items: center; justify-content: flex-end;
-    padding-right: 8px;
-    font-size: 11px; font-weight: 500; color: rgba(255,255,255,.85);
-    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+    padding-right: 12px; font-size: 13px; font-weight: 700; color: #fff;
+    transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
     font-family: var(--mono);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12); position: relative;
   }
-  .funnel-pct { font-size: 10px; color: var(--text3); min-width: 36px; font-family: var(--mono); }
+
+  .funnel-bar-inner::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.22), transparent);
+    pointer-events: none;
+  }
+
+  .funnel-pct { font-size: 11px; color: var(--text-muted); min-width: 48px; font-family: var(--mono); font-weight: 600; }
 
   /* SOURCE BARS */
-  .source-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .source-name { font-size: 12px; color: var(--text2); min-width: 70px; }
-  .source-bar-outer { flex:1; height: 20px; background: var(--bg3); border-radius: 4px; overflow:hidden; }
-  .source-bar-inner { height:100%; border-radius:4px; transition: width 1s ease; display:flex; align-items:center; padding-left:8px; font-size:10px; color:rgba(255,255,255,.8); font-family:var(--mono); font-weight:500; }
-  .source-pct { font-size:11px; font-weight:600; color:var(--text); min-width:40px; font-family:var(--mono); text-align:right; }
+  .source-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .source-name { font-size: 13px; color: var(--text-secondary); min-width: 80px; font-weight: 600; }
 
-  /* RECRUITER TABLE */
+  .source-bar-outer {
+    flex: 1; height: 28px; background: #fef3e8;
+    border-radius: 8px; overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(180,83,9,0.08);
+  }
+
+  .source-bar-inner {
+    height: 100%; border-radius: 8px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+    display: flex; align-items: center; padding-left: 12px;
+    font-size: 11px; color: #fff; font-family: var(--mono); font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1); position: relative;
+  }
+
+  .source-bar-inner::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent);
+  }
+
+  .source-pct { font-size: 13px; font-weight: 700; color: var(--text-primary); min-width: 50px; font-family: var(--mono); text-align: right; }
+
+  /* TABLE */
   .rec-table { width: 100%; border-collapse: collapse; }
   .rec-table th {
-    font-size: 10px; font-weight: 500; color: var(--text3);
-    letter-spacing: .06em; text-transform: uppercase;
-    padding: 0 10px 10px; text-align: left; border-bottom: 1px solid var(--border);
+    font-size: 11px; font-weight: 700; color: var(--text-tertiary);
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: 12px 16px; text-align: left;
+    border-bottom: 2px solid var(--border-light);
+    background: #fef3e8;
   }
-  .rec-table td { padding: 10px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .rec-table td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
   .rec-table tr:last-child td { border-bottom: none; }
-  .rec-table tr { transition: background .15s; }
-  .rec-table tr:hover td { background: rgba(255,255,255,.02); }
-  .rank-badge {
-    font-size: 10px; font-weight: 600; padding: 3px 8px;
-    border-radius: 99px; font-family: var(--mono);
-  }
-  .rank-top { background: rgba(22,163,74,.1); color: #15803d; border: 1px solid rgba(22,163,74,.25); }
-  .rank-bot { background: rgba(220,38,38,.08); color: #b91c1c; border: 1px solid rgba(220,38,38,.2); }
-  .rank-mid { background: var(--bg3); color: var(--text2); }
-  .pct-bar-wrap { display:flex; align-items:center; gap:8px; }
-  .pct-bar-bg { flex:1; height:4px; background:var(--bg3); border-radius:99px; overflow:hidden; }
-  .pct-bar-fg { height:100%; border-radius:99px; }
-  .pct-num { font-family:var(--mono); font-size:11px; min-width:36px; text-align:right; }
+  .rec-table tbody tr { transition: all 0.2s; }
+  .rec-table tbody tr:hover { background: var(--bg-hover); }
+
+  .rank-badge { font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 8px; font-family: var(--mono); }
+  .rank-top { background: rgba(249,115,22,0.12); color: #c2410c; border: 1px solid rgba(249,115,22,0.3); }
+  .rank-bot { background: rgba(220,38,38,0.1); color: #b91c1c; border: 1px solid rgba(220,38,38,0.28); }
+  .rank-mid { background: #fef3e8; color: var(--text-tertiary); border: 1px solid var(--border); }
+
+  .pct-bar-wrap { display: flex; align-items: center; gap: 10px; }
+  .pct-bar-bg { flex: 1; height: 6px; background: #fce8d0; border-radius: 99px; overflow: hidden; }
+  .pct-bar-fg { height: 100%; border-radius: 99px; }
+  .pct-num { font-family: var(--mono); font-size: 12px; min-width: 45px; text-align: right; font-weight: 700; }
 
   /* TL CARDS */
-  .tl-grid { display:grid; grid-template-columns: repeat(5,1fr); gap:10px; }
-  @media(max-width:900px){ .tl-grid { grid-template-columns: repeat(3,1fr); } }
-  .tl-card {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px; text-align:center;
-    position:relative; overflow:hidden;
-  }
-  .tl-avatar {
-    width: 40px; height: 40px; border-radius: 50%;
-    display: flex; align-items:center; justify-content:center;
-    font-size: 13px; font-weight: 600; margin: 0 auto 10px;
-  }
-  .tl-name { font-size: 11px; font-weight: 500; color: var(--text); line-height:1.3; }
-  .tl-pct { font-size: 20px; font-weight: 600; margin: 6px 0 2px; font-family: var(--mono); }
-  .tl-sub { font-size: 10px; color: var(--text3); }
-  .tl-bar { height: 3px; border-radius: 99px; margin-top: 10px; }
+  .tl-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 16px; }
+  @media(max-width:1100px){ .tl-grid { grid-template-columns: repeat(3,1fr); } }
+  @media(max-width:700px){ .tl-grid { grid-template-columns: repeat(2,1fr); } }
 
-  /* TREND CHART */
-  .trend-legend { display:flex; gap:16px; margin-bottom:12px; }
-  .trend-legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text2); }
-  .trend-dot { width:8px; height:8px; border-radius:50%; }
+  .tl-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--card-radius); padding: 20px; text-align: center;
+    position: relative; overflow: hidden; transition: all 0.3s; box-shadow: var(--shadow-sm);
+  }
+
+  .tl-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--tl-color); }
+
+  .tl-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--tl-color); }
+
+  .tl-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; margin: 0 auto 14px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .tl-name { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; margin-bottom: 8px; }
+  .tl-pct { font-size: 28px; font-weight: 700; margin: 8px 0 4px; font-family: var(--mono); letter-spacing: -0.02em; }
+  .tl-sub { font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+  .tl-bar { height: 4px; border-radius: 99px; margin-top: 14px; background: #fce8d0; overflow: hidden; }
+
+  /* TREND LEGEND */
+  .trend-legend { display: flex; gap: 20px; margin-bottom: 16px; }
+  .trend-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+  .trend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
   /* FILTER BAR */
   .filter-bar {
-    display: flex; gap: 10px; align-items: center;
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 16px;
-    margin-bottom: 6px; flex-wrap: wrap;
+    display: flex; gap: 12px; align-items: center;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px;
+    margin-bottom: 8px; flex-wrap: wrap; box-shadow: var(--shadow-sm);
   }
-  .filter-label { font-size: 11px; color: var(--text3); font-weight: 500; }
+
+  .filter-label { font-size: 12px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; }
+
   .filter-btn {
-    font-size: 11px; padding: 5px 12px; border-radius: 99px;
+    font-size: 12px; padding: 8px 16px; border-radius: 8px;
     border: 1px solid var(--border); background: transparent;
-    color: var(--text2); cursor: pointer; font-family: var(--font);
-    transition: all .15s;
+    color: var(--text-secondary); cursor: pointer;
+    font-family: var(--font); transition: all 0.2s; font-weight: 600;
   }
-  .filter-btn:hover, .filter-btn.active {
-    background: rgba(37,99,235,.08);
-    border-color: rgba(37,99,235,.35);
-    color: #2563eb;
+
+  .filter-btn:hover { background: rgba(249,115,22,0.08); border-color: rgba(234,88,12,0.35); color: var(--accent-orange-dark); }
+
+  .filter-btn.active {
+    background: linear-gradient(135deg, #f97316, #dc2626);
+    border-color: transparent; color: white;
+    box-shadow: 0 4px 14px rgba(249,115,22,0.3);
   }
 
   /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 99px; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #fef3e8; }
+  ::-webkit-scrollbar-thumb { background: rgba(180,83,9,0.25); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(180,83,9,0.4); }
 
   /* ANIMATIONS */
-  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-  .card, .kpi-card { animation: fadeUp .4s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .card, .kpi-card, .tl-card { animation: fadeUp 0.6s cubic-bezier(0.4,0,0.2,1) both; }
   .kpi-card:nth-child(1){animation-delay:.05s} .kpi-card:nth-child(2){animation-delay:.1s}
   .kpi-card:nth-child(3){animation-delay:.15s} .kpi-card:nth-child(4){animation-delay:.2s}
   .kpi-card:nth-child(5){animation-delay:.25s} .kpi-card:nth-child(6){animation-delay:.3s}
+
+  @media(max-width:768px) {
+    .main { padding: 20px; } .header { padding: 16px 20px; }
+    .kpi-value { font-size: 24px; } .card-title { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="header">
   <div class="header-left">
     <div class="logo-mark">R</div>
     <div>
-      <div class="header-title">Recruitment Analytics</div>
-      <div class="header-sub">Q9 Dashboard · Jan – Dec 2025</div>
+      <div class="header-title">Recruitment Analytics Platform</div>
+      <div class="header-sub">Q9 Dashboard · January – December 2025</div>
     </div>
   </div>
   <div class="header-right">
-    <span class="pill">5 TLs</span>
+    <span class="pill">5 Team Leads</span>
     <span class="pill">17 Recruiters</span>
     <span class="pill live">Live Data</span>
   </div>
@@ -263,10 +380,9 @@
 
 <div class="main">
 
-  <!-- FILTER BAR -->
   <div class="filter-bar">
-    <span class="filter-label">Filter by TL:</span>
-    <button class="filter-btn active" onclick="filterTL('all',this)">All</button>
+    <span class="filter-label">FILTER BY TEAM LEAD:</span>
+    <button class="filter-btn active" onclick="filterTL('all',this)">All Teams</button>
     <button class="filter-btn" onclick="filterTL('Arpit Khanna',this)">Arpit Khanna</button>
     <button class="filter-btn" onclick="filterTL('Riya Sharma',this)">Riya Sharma</button>
     <button class="filter-btn" onclick="filterTL('Dev Malhotra',this)">Dev Malhotra</button>
@@ -274,127 +390,118 @@
     <button class="filter-btn" onclick="filterTL('Aman Verma',this)">Aman Verma</button>
   </div>
 
-  <!-- KPIs -->
-  <div class="section-label">Key performance indicators</div>
-  <div class="kpi-grid" id="kpiGrid">
-    <div class="kpi-card" style="--accent-color:#4f8ef7">
+  <div class="section-label">Key Performance Indicators</div>
+  <div class="kpi-grid">
+    <div class="kpi-card" style="--accent-color:#f97316; --accent-light:#fb923c;">
       <span class="kpi-icon">📋</span>
       <div class="kpi-value" id="kpi-apps">16,312</div>
       <div class="kpi-label">Total Applications</div>
-      <div class="kpi-delta up">↑ All sourcing channels</div>
+      <div class="kpi-delta up">↑ All Channels Active</div>
     </div>
-    <div class="kpi-card" style="--accent-color:#7b5cf5">
+    <div class="kpi-card" style="--accent-color:#d97706; --accent-light:#f59e0b;">
       <span class="kpi-icon">🎯</span>
       <div class="kpi-value" id="kpi-interviews">730</div>
       <div class="kpi-label">Interviews Conducted</div>
       <div class="kpi-delta">4.5% of applications</div>
     </div>
-    <div class="kpi-card" style="--accent-color:#30c97e">
+    <div class="kpi-card" style="--accent-color:#c2410c; --accent-light:#ea580c;">
       <span class="kpi-icon">✅</span>
       <div class="kpi-value" id="kpi-placed">174</div>
       <div class="kpi-label">Total Placements</div>
       <div class="kpi-delta up">↑ 23.8% conversion</div>
     </div>
-    <div class="kpi-card" style="--accent-color:#26c9c3">
+    <div class="kpi-card" style="--accent-color:#b45309; --accent-light:#d97706;">
       <span class="kpi-icon">📈</span>
       <div class="kpi-value" id="kpi-rate">23.8%</div>
       <div class="kpi-label">Placement Rate</div>
-      <div class="kpi-delta up">↑ placed / interviews</div>
+      <div class="kpi-delta up">↑ Placed / Interviews</div>
     </div>
-    <div class="kpi-card" style="--accent-color:#f5a623">
+    <div class="kpi-card" style="--accent-color:#ca8a04; --accent-light:#eab308;">
       <span class="kpi-icon">⏳</span>
       <div class="kpi-value" id="kpi-pipeline">387</div>
-      <div class="kpi-label">In Pipeline (Selected)</div>
-      <div class="kpi-delta">53% of total interviews</div>
+      <div class="kpi-label">Active Pipeline</div>
+      <div class="kpi-delta">53% of interviews</div>
     </div>
-    <div class="kpi-card" style="--accent-color:#f25a5a">
+    <div class="kpi-card" style="--accent-color:#dc2626; --accent-light:#ef4444;">
       <span class="kpi-icon">❌</span>
       <div class="kpi-value" id="kpi-rej">23.2%</div>
       <div class="kpi-label">Rejection Rate</div>
-      <div class="kpi-delta down">169 rejected candidates</div>
+      <div class="kpi-delta down">↓ 169 candidates</div>
     </div>
   </div>
 
-  <!-- FUNNEL + SOURCE -->
-  <div class="section-label">Funnel analysis & source performance</div>
+  <div class="section-label">Funnel Analysis & Source Performance</div>
   <div class="chart-grid-3">
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">Recruitment funnel — round drop-off</div>
-          <div class="card-sub">Candidates entering each stage</div>
+          <div class="card-title">Recruitment Funnel — Stage Drop-off Analysis</div>
+          <div class="card-sub">Candidate progression through interview rounds</div>
         </div>
-        <span class="card-badge" style="background:rgba(79,142,247,.1);color:#4f8ef7;border:1px solid rgba(79,142,247,.2);">730 total</span>
+        <span class="card-badge" style="background:rgba(249,115,22,.1);color:#c2410c;border:1px solid rgba(249,115,22,.25);">730 total</span>
       </div>
-      <div class="funnel-wrap" id="funnelWrap">
-        <!-- injected by JS -->
-      </div>
+      <div class="funnel-wrap" id="funnelWrap"></div>
     </div>
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">Source performance</div>
-          <div class="card-sub">Placement % by channel</div>
+          <div class="card-title">Source Performance</div>
+          <div class="card-sub">Placement rate by channel</div>
         </div>
       </div>
       <div id="sourceWrap"></div>
     </div>
   </div>
 
-  <!-- TREND + TL -->
-  <div class="section-label">Time trends & team performance</div>
+  <div class="section-label">Time Trends & Performance Analytics</div>
   <div class="chart-grid-2">
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">Monthly trend — interviews vs placements</div>
-          <div class="card-sub">Jan 2025 – Dec 2025</div>
+          <div class="card-title">Monthly Trend — Interviews vs Placements</div>
+          <div class="card-sub">12-month performance overview (2025)</div>
         </div>
         <div class="trend-legend">
-          <div class="trend-legend-item"><div class="trend-dot" style="background:#2563eb"></div>Interviews</div>
-          <div class="trend-legend-item"><div class="trend-dot" style="background:#16a34a"></div>Placements</div>
+          <div class="trend-legend-item">
+            <div class="trend-dot" style="background:#f97316"></div> Interviews
+          </div>
+          <div class="trend-legend-item">
+            <div class="trend-dot" style="background:#dc2626"></div> Placements
+          </div>
         </div>
       </div>
-      <div style="position:relative;height:220px">
-        <canvas id="trendChart" role="img" aria-label="Monthly trend of interviews and placements 2025">Monthly interviews and placements Jan-Dec 2025.</canvas>
+      <div style="position:relative;height:240px">
+        <canvas id="trendChart"></canvas>
       </div>
     </div>
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">Source volume vs quality</div>
-          <div class="card-sub">Total interviews by source</div>
+          <div class="card-title">Source Volume Distribution</div>
+          <div class="card-sub">Interview breakdown by channel</div>
         </div>
       </div>
-      <div style="position:relative;height:220px">
-        <canvas id="sourceChart" role="img" aria-label="Source breakdown by interview count">Source breakdown by interview count.</canvas>
+      <div style="position:relative;height:240px">
+        <canvas id="sourceChart"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- TL PERFORMANCE -->
-  <div class="section-label">Team lead performance</div>
+  <div class="section-label">Team Lead Performance Overview</div>
   <div class="tl-grid" id="tlGrid"></div>
 
-  <!-- RECRUITER TABLE -->
-  <div class="section-label">Recruiter leaderboard</div>
+  <div class="section-label">Recruiter Leaderboard</div>
   <div class="card" style="padding:0;overflow:hidden;">
-    <div style="padding:18px 22px 12px;border-bottom:1px solid var(--border);">
-      <div class="card-title">All recruiters ranked by placement %</div>
-      <div class="card-sub" style="margin-top:3px;">Criteria: placement rate (placed ÷ interviews). Min 15 interviews for Top/Bottom ranking. Top 2 → green · Bottom 2 → red.</div>
+    <div style="padding:24px 28px 16px;border-bottom:1px solid var(--border-light);background:#fef3e8;">
+      <div class="card-title">All Recruiters Ranked by Placement Rate</div>
+      <div class="card-sub" style="margin-top:6px;">Ranking criteria: Placement % (Placed ÷ Interviews). Minimum 15 interviews required for Top/Bottom designation. Top 2 🟠 · Bottom 2 🔴</div>
     </div>
     <div style="overflow-x:auto;">
-      <table class="rec-table" id="recTable">
+      <table class="rec-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Recruiter</th>
-            <th>Interviews</th>
-            <th>Placed</th>
-            <th>Rejected</th>
-            <th>Placement %</th>
-            <th>Rejection %</th>
-            <th>Rank</th>
+            <th>#</th><th>Recruiter Name</th><th>Interviews</th><th>Placed</th>
+            <th>Rejected</th><th>Placement %</th><th>Rejection %</th><th>Rank</th>
           </tr>
         </thead>
         <tbody id="recBody"></tbody>
@@ -402,11 +509,10 @@
     </div>
   </div>
 
-  <div style="height:32px"></div>
+  <div style="height:48px"></div>
 </div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────────────────────────
 const DATA = {
   all: {
     apps: 16312, interviews: 730, placed: 174, rejected: 169, pipeline: 387,
@@ -450,118 +556,113 @@ const DATA = {
       { name:'Deepti', total:13, placed:6, rejected:0, pct:46.2, rpct:0.0 },
     ].sort((a,b)=>b.pct-a.pct),
     tls: [
-      { name:'Arpit Khanna', total:257, placed:83, pct:32.3, color:'#2563eb' },
-      { name:'Riya Sharma', total:168, placed:42, pct:25.0, color:'#16a34a' },
-      { name:'Aman Verma', total:67, placed:11, pct:16.4, color:'#d97706' },
-      { name:'Priya Singh', total:104, placed:17, pct:16.3, color:'#7c3aed' },
+      { name:'Arpit Khanna', total:257, placed:83, pct:32.3, color:'#f97316' },
+      { name:'Riya Sharma', total:168, placed:42, pct:25.0, color:'#d97706' },
+      { name:'Aman Verma', total:67, placed:11, pct:16.4, color:'#ca8a04' },
+      { name:'Priya Singh', total:104, placed:17, pct:16.3, color:'#b45309' },
       { name:'Dev Malhotra', total:134, placed:21, pct:15.7, color:'#dc2626' },
     ],
   }
 };
 
-// TL filter data subsets
 const TL_DATA = {
   'Arpit Khanna': { apps:5040, interviews:257, placed:83, rejected:66, pipeline:108 },
-  'Riya Sharma': { apps:3360, interviews:168, placed:42, rejected:31, pipeline:95 },
-  'Dev Malhotra': { apps:2680, interviews:134, placed:21, rejected:26, pipeline:87 },
-  'Priya Singh': { apps:2080, interviews:104, placed:17, rejected:34, pipeline:53 },
-  'Aman Verma': { apps:1340, interviews:67, placed:11, rejected:12, pipeline:44 },
+  'Riya Sharma':  { apps:3360, interviews:168, placed:42, rejected:31,  pipeline:95  },
+  'Dev Malhotra': { apps:2680, interviews:134, placed:21, rejected:26,  pipeline:87  },
+  'Priya Singh':  { apps:2080, interviews:104, placed:17, rejected:34,  pipeline:53  },
+  'Aman Verma':   { apps:1340, interviews:67,  placed:11, rejected:12,  pipeline:44  },
 };
 
-// ─── CHART INSTANCES ─────────────────────────────────────────────────────────
 let trendChart, sourceChart;
 
-// ─── FUNNEL ──────────────────────────────────────────────────────────────────
-const FUNNEL_COLORS = ['#2563eb','#7c3aed','#0891b2','#16a34a','#d97706','#dc2626'];
+const FUNNEL_COLORS = [
+  'linear-gradient(135deg,#f97316,#ea580c)',
+  'linear-gradient(135deg,#d97706,#b45309)',
+  'linear-gradient(135deg,#dc2626,#b91c1c)',
+  'linear-gradient(135deg,#c2410c,#9a3412)',
+  'linear-gradient(135deg,#ca8a04,#a16207)',
+  'linear-gradient(135deg,#f97316,#fb923c)',
+];
+
+const SRC_COLORS = [
+  'linear-gradient(135deg,#f97316,#ea580c)',
+  'linear-gradient(135deg,#d97706,#b45309)',
+  'linear-gradient(135deg,#dc2626,#b91c1c)',
+  'linear-gradient(135deg,#ca8a04,#a16207)',
+  'linear-gradient(135deg,#c2410c,#9a3412)',
+];
 
 function renderFunnel(data) {
   const max = data.funnel[0].count;
   const wrap = document.getElementById('funnelWrap');
-  wrap.innerHTML = data.funnel.map((f, i) => {
-    const pct = Math.round((f.count / max) * 100);
-    const dropPct = i > 0 ? Math.round((1 - f.count / data.funnel[i-1].count) * 100) : 0;
+  wrap.innerHTML = data.funnel.map((f,i) => {
+    const pct = Math.round((f.count/max)*100);
+    const dropPct = i > 0 ? Math.round((1-f.count/data.funnel[i-1].count)*100) : 0;
     return `<div class="funnel-row">
       <div class="funnel-stage">${f.stage}</div>
       <div class="funnel-bar-outer">
-        <div class="funnel-bar-inner" style="width:0%;background:${FUNNEL_COLORS[i]}" data-w="${pct}%">
-          ${f.count}
-        </div>
+        <div class="funnel-bar-inner" style="width:0%;background:${FUNNEL_COLORS[i]}" data-w="${pct}%">${f.count}</div>
       </div>
-      <div class="funnel-pct">${i > 0 ? `↓${dropPct}%` : ''}</div>
+      <div class="funnel-pct">${i>0?`↓${dropPct}%`:''}</div>
     </div>`;
   }).join('');
   setTimeout(() => {
-    wrap.querySelectorAll('.funnel-bar-inner').forEach(el => {
-      el.style.width = el.dataset.w;
-    });
+    wrap.querySelectorAll('.funnel-bar-inner').forEach(el => { el.style.width = el.dataset.w; });
   }, 100);
 }
 
-// ─── SOURCE BARS ─────────────────────────────────────────────────────────────
-const SRC_COLORS = ['#2563eb','#0891b2','#7c3aed','#d97706','#dc2626'];
-
 function renderSources(data) {
-  const max = Math.max(...data.sources.map(s => s.pct));
-  document.getElementById('sourceWrap').innerHTML = data.sources.map((s, i) => `
+  const max = Math.max(...data.sources.map(s=>s.pct));
+  document.getElementById('sourceWrap').innerHTML = data.sources.map((s,i) => `
     <div class="source-row">
       <div class="source-name">${s.name}</div>
       <div class="source-bar-outer">
-        <div class="source-bar-inner" style="width:0%;background:${SRC_COLORS[i]}" data-w="${(s.pct/max*100).toFixed(1)}%">
-          ${s.total} intvw
-        </div>
+        <div class="source-bar-inner" style="width:0%;background:${SRC_COLORS[i]}" data-w="${(s.pct/max*100).toFixed(1)}%">${s.total} intvw</div>
       </div>
       <div class="source-pct">${s.pct}%</div>
     </div>
   `).join('');
   setTimeout(() => {
-    document.querySelectorAll('.source-bar-inner').forEach(el => {
-      el.style.width = el.dataset.w;
-    });
+    document.querySelectorAll('.source-bar-inner').forEach(el => { el.style.width = el.dataset.w; });
   }, 100);
 }
 
-// ─── TL CARDS ────────────────────────────────────────────────────────────────
-function initials(name) {
-  return name.split(' ').slice(0,2).map(w=>w[0]).join('');
-}
+function initials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join(''); }
 
 function renderTL(data) {
   document.getElementById('tlGrid').innerHTML = data.tls.map(tl => `
-    <div class="tl-card">
-      <div class="tl-avatar" style="background:${tl.color}22; color:${tl.color}; border:1.5px solid ${tl.color}44;">
-        ${initials(tl.name)}
-      </div>
+    <div class="tl-card" style="--tl-color:${tl.color}">
+      <div class="tl-avatar" style="background:${tl.color}18;color:${tl.color};border:2px solid ${tl.color};">${initials(tl.name)}</div>
       <div class="tl-name">${tl.name}</div>
       <div class="tl-pct" style="color:${tl.color}">${tl.pct}%</div>
       <div class="tl-sub">${tl.placed}/${tl.total} placed</div>
-      <div class="tl-bar" style="background:${tl.color}22">
+      <div class="tl-bar">
         <div style="width:${tl.pct/40*100}%;height:100%;background:${tl.color};border-radius:99px;"></div>
       </div>
     </div>
   `).join('');
 }
 
-// ─── RECRUITER TABLE ─────────────────────────────────────────────────────────
 function renderTable(data) {
-  const eligible = data.recruiters.filter(r => r.total >= 15);
-  const top2 = eligible.slice(0, 2).map(r => r.name);
-  const bot2 = eligible.slice(-2).map(r => r.name);
+  const eligible = data.recruiters.filter(r=>r.total>=15);
+  const top2 = eligible.slice(0,2).map(r=>r.name);
+  const bot2 = eligible.slice(-2).map(r=>r.name);
 
-  document.getElementById('recBody').innerHTML = data.recruiters.map((r, i) => {
+  document.getElementById('recBody').innerHTML = data.recruiters.map((r,i) => {
     let badge = '';
-    if (top2.includes(r.name)) badge = `<span class="rank-badge rank-top">Top ${top2.indexOf(r.name)+1}</span>`;
-    else if (bot2.includes(r.name)) badge = `<span class="rank-badge rank-bot">Bottom ${bot2.indexOf(r.name)+1}</span>`;
+    if (top2.includes(r.name)) badge = `<span class="rank-badge rank-top">🟠 Top ${top2.indexOf(r.name)+1}</span>`;
+    else if (bot2.includes(r.name)) badge = `<span class="rank-badge rank-bot">🔴 Bottom ${bot2.indexOf(r.name)+1}</span>`;
     else badge = `<span class="rank-badge rank-mid">#${i+1}</span>`;
 
-    const barColor = r.pct >= 30 ? '#16a34a' : r.pct >= 20 ? '#2563eb' : r.pct >= 15 ? '#d97706' : '#dc2626';
-    const rejColor = r.rpct >= 35 ? '#dc2626' : r.rpct >= 20 ? '#d97706' : '#16a34a';
+    const barColor = r.pct>=30?'#f97316':r.pct>=20?'#d97706':r.pct>=15?'#ca8a04':'#dc2626';
+    const rejColor = r.rpct>=35?'#dc2626':r.rpct>=20?'#d97706':'#c2410c';
 
     return `<tr>
-      <td style="color:var(--text3);font-family:var(--mono)">${i+1}</td>
-      <td style="font-weight:500">${r.name}</td>
-      <td style="font-family:var(--mono);color:var(--text2)">${r.total}</td>
-      <td style="font-family:var(--mono);color:#16a34a">${r.placed}</td>
-      <td style="font-family:var(--mono);color:#dc2626">${r.rejected}</td>
+      <td style="color:var(--text-muted);font-family:var(--mono);font-weight:700">${i+1}</td>
+      <td style="font-weight:600;color:var(--text-primary)">${r.name}</td>
+      <td style="font-family:var(--mono);color:var(--text-secondary);font-weight:600">${r.total}</td>
+      <td style="font-family:var(--mono);color:#c2410c;font-weight:700">${r.placed}</td>
+      <td style="font-family:var(--mono);color:#b91c1c;font-weight:700">${r.rejected}</td>
       <td>
         <div class="pct-bar-wrap">
           <div class="pct-bar-bg"><div class="pct-bar-fg" style="width:${r.pct/50*100}%;background:${barColor}"></div></div>
@@ -579,7 +680,6 @@ function renderTable(data) {
   }).join('');
 }
 
-// ─── TREND CHART ─────────────────────────────────────────────────────────────
 function renderTrend(data) {
   if (trendChart) trendChart.destroy();
   const ctx = document.getElementById('trendChart').getContext('2d');
@@ -589,136 +689,105 @@ function renderTrend(data) {
       labels: data.monthly.labels,
       datasets: [
         {
-          label: 'Interviews',
-          data: data.monthly.interviews,
-          borderColor: '#2563eb',
-          backgroundColor: 'rgba(37,99,235,0.07)',
-          fill: true,
-          tension: 0.35,
-          pointRadius: 4,
-          pointBackgroundColor: '#2563eb',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
+          label: 'Interviews', data: data.monthly.interviews,
+          borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.08)',
+          fill: true, tension: 0.4, pointRadius: 5,
+          pointBackgroundColor: '#f97316', pointBorderColor: '#fff',
+          pointBorderWidth: 2, pointHoverRadius: 7, borderWidth: 2.5,
         },
         {
-          label: 'Placements',
-          data: data.monthly.placed,
-          borderColor: '#16a34a',
-          backgroundColor: 'rgba(22,163,74,0.08)',
-          fill: true,
-          tension: 0.35,
-          pointRadius: 4,
-          pointBackgroundColor: '#16a34a',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
-          borderDash: [4,3],
+          label: 'Placements', data: data.monthly.placed,
+          borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.07)',
+          fill: true, tension: 0.4, pointRadius: 5,
+          pointBackgroundColor: '#dc2626', pointBorderColor: '#fff',
+          pointBorderWidth: 2, pointHoverRadius: 7, borderWidth: 2.5,
         }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(254,243,232,0.97)',
+          titleColor: '#431407', bodyColor: '#7c2d12',
+          borderColor: 'rgba(249,115,22,0.25)', borderWidth: 1,
+          padding: 12, displayColors: true, boxPadding: 6,
+        }
+      },
       scales: {
-        x: { ticks: { color: '#9ba3b5', font:{size:10} }, grid: { color: 'rgba(0,0,0,.06)' }, border: { display:false } },
-        y: { ticks: { color: '#9ba3b5', font:{size:10} }, grid: { color: 'rgba(0,0,0,.06)' }, border: { display:false } }
+        x: { ticks: { color: '#9a3412', font:{size:11,weight:'600'} }, grid: { color: 'rgba(249,115,22,.07)' }, border: { display:false } },
+        y: { ticks: { color: '#9a3412', font:{size:11,weight:'600'} }, grid: { color: 'rgba(249,115,22,.07)' }, border: { display:false } }
       }
     }
   });
 }
 
-// ─── SOURCE DONUT ─────────────────────────────────────────────────────────────
 function renderSourceChart(data) {
   if (sourceChart) sourceChart.destroy();
   const ctx = document.getElementById('sourceChart').getContext('2d');
   sourceChart = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: data.sources.map(s => s.name),
+      labels: data.sources.map(s=>s.name),
       datasets: [{
-        data: data.sources.map(s => s.total),
-        backgroundColor: SRC_COLORS,
-        borderColor: '#ffffff',
-        borderWidth: 3,
-        hoverOffset: 6,
+        data: data.sources.map(s=>s.total),
+        backgroundColor: ['#f97316','#d97706','#dc2626','#ca8a04','#b45309'],
+        borderColor: '#ffffff', borderWidth: 3, hoverOffset: 8,
       }]
     },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '65%',
+      responsive: true, maintainAspectRatio: false, cutout: '68%',
       plugins: {
         legend: {
-          display: true,
-          position: 'right',
-          labels: { color: '#5c6476', font: { size: 11 }, boxWidth: 10, padding: 14 }
+          display: true, position: 'right',
+          labels: { color: '#7c2d12', font:{size:12,weight:'600'}, boxWidth:12, padding:16, usePointStyle:true, pointStyle:'circle' }
         },
         tooltip: {
-          callbacks: {
-            label: ctx => ` ${ctx.label}: ${ctx.raw} interviews (${data.sources[ctx.dataIndex].pct}% placed)`
-          }
+          backgroundColor: 'rgba(254,243,232,0.97)',
+          titleColor: '#431407', bodyColor: '#7c2d12',
+          borderColor: 'rgba(249,115,22,0.25)', borderWidth:1, padding:12,
+          callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} interviews (${data.sources[ctx.dataIndex].pct}% placed)` }
         }
       }
     }
   });
 }
 
-// ─── KPI UPDATE ──────────────────────────────────────────────────────────────
 function updateKPIs(d) {
   document.getElementById('kpi-apps').textContent = d.apps.toLocaleString();
   document.getElementById('kpi-interviews').textContent = d.interviews.toLocaleString();
   document.getElementById('kpi-placed').textContent = d.placed.toLocaleString();
-  const rate = ((d.placed / d.interviews) * 100).toFixed(1);
-  document.getElementById('kpi-rate').textContent = rate + '%';
+  document.getElementById('kpi-rate').textContent = ((d.placed/d.interviews)*100).toFixed(1)+'%';
   document.getElementById('kpi-pipeline').textContent = d.pipeline.toLocaleString();
-  const rejRate = ((d.rejected / d.interviews) * 100).toFixed(1);
-  document.getElementById('kpi-rej').textContent = rejRate + '%';
+  document.getElementById('kpi-rej').textContent = ((d.rejected/d.interviews)*100).toFixed(1)+'%';
 }
 
-// ─── FILTER ──────────────────────────────────────────────────────────────────
 function filterTL(tl, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-
   const base = DATA.all;
   if (tl === 'all') {
-    updateKPIs(base);
-    renderFunnel(base);
-    renderSources(base);
-    renderTrend(base);
-    renderSourceChart(base);
-    renderTable(base);
-    renderTL(base);
+    updateKPIs(base); renderFunnel(base); renderSources(base); renderTrend(base); renderSourceChart(base); renderTable(base); renderTL(base);
   } else {
-    const d = TL_DATA[tl];
-    updateKPIs(d);
-    // Show filtered recruiters by TL (approximate — from full data)
+    updateKPIs(TL_DATA[tl]);
     const tlRecs = {
       'Arpit Khanna': ['Akhil','Manish','Ashar'],
-      'Riya Sharma': ['Khushi','Anjali','Deepak'],
+      'Riya Sharma':  ['Khushi','Anjali','Deepak'],
       'Dev Malhotra': ['Aastha','Adarsh Kumar','Kunal Tak'],
-      'Priya Singh': ['Faisal','Mahi','Bikash K.'],
-      'Aman Verma': ['Anuvab C.','Ankit','Jaimin Ray'],
+      'Priya Singh':  ['Faisal','Mahi','Bikash K.'],
+      'Aman Verma':   ['Anuvab C.','Ankit','Jaimin Ray'],
     };
-    const filtered = base.recruiters.filter(r => (tlRecs[tl]||[]).includes(r.name));
-    const filtData = { ...base, recruiters: filtered.length ? filtered : base.recruiters };
-    renderTable(filtData);
-    renderFunnel(base);
-    renderSources(base);
-    renderTrend(base);
-    renderSourceChart(base);
-    renderTL(base);
+    const filtered = base.recruiters.filter(r=>(tlRecs[tl]||[]).includes(r.name));
+    renderTable({ ...base, recruiters: filtered.length ? filtered : base.recruiters });
+    renderFunnel(base); renderSources(base); renderTrend(base); renderSourceChart(base); renderTL(base);
   }
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
 (function init() {
   const d = DATA.all;
-  updateKPIs(d);
-  renderFunnel(d);
-  renderSources(d);
-  renderTrend(d);
-  renderSourceChart(d);
-  renderTable(d);
-  renderTL(d);
+  updateKPIs(d); renderFunnel(d); renderSources(d); renderTrend(d); renderSourceChart(d); renderTable(d); renderTL(d);
 })();
 </script>
 </body>
